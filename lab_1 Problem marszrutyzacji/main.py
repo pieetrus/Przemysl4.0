@@ -1,16 +1,28 @@
-# This is a sample Python script.
-
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+import csv
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+def convert_matrix_values_from_string_to_float(array):
+    row_index = 0
+    column_index = 0
+    for row_values in array:
+        row_index = row_index + 1
+        for value in row_values:
+            column_index = column_index + 1
+            array[row_index - 1][column_index - 1] = float(value.replace(',', '.'))
+        column_index = 0
 
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    fileName = 'data/PL.csv'
+    with open(fileName, 'r') as file:
+        reader = csv.reader(file, delimiter=";", skipinitialspace=True)
+        data = list(reader)
+    n = int(data[0][0])
+    unit = data[1][0]
+    km_data = data[2:n + 2]
+    convert_matrix_values_from_string_to_float(km_data)
+    cities_data = []
+    for line in data[n + 2:]:
+        cities_data.append([line[0], line[1], line[2], line[3]])
+    print(cities_data)
+    print(km_data)
