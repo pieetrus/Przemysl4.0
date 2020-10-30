@@ -4,7 +4,7 @@ MAX_VALUE = 999999
 MIN_VALUE = -1
 
 
-class VRP:
+class CVRP:
     def __init__(self, file_name):
         with open(file_name, 'r') as file:
             reader = csv.reader(file, delimiter=";", skipinitialspace=True)
@@ -50,12 +50,12 @@ class VRP:
                 if amount_of_order_handle_by_k_vehicle + 1 < courses_amount:
                     permutation.append(l)
                     available_cities.remove(l)
+                    amount_of_order_handle_by_k_vehicle = amount_of_order_handle_by_k_vehicle + 1
                     if not available_cities:
                         limit = False
-                    amount_of_order_handle_by_k_vehicle += 1
                 else:
                     limit = False
-            lorry_number += 1
+            lorry_number = lorry_number + 1
         return permutation
 
     def find_max(self, list_of_available_cities, base):
@@ -86,7 +86,6 @@ class VRP:
         distance_sum = 0
         for origin, target in zip(permutation, permutation[1:]):
             distance_sum += self.km_data[origin][target]
-        distance_sum += self.km_data[permutation[0]][permutation[-1]]
         return distance_sum
 
     def __convert_matrix_values_from_string_to_float(self, array):
