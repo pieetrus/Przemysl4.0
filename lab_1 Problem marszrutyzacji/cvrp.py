@@ -2,11 +2,19 @@ import csv
 
 MAX_VALUE = 999999
 MIN_VALUE = -1
+maxWeight = {
+    'Truck': 8000,
+    'Lorry': 24000
+}
+maxSize = {
+    'Truck': 7.8,
+    'Lorry': 16.6
+}
 
 
 class CVRP:
     def __init__(self, file_name):
-        with open(file_name, 'r') as file:
+        with open("data/" + file_name + ".csv", 'r') as file:
             reader = csv.reader(file, delimiter=";", skipinitialspace=True)
             data = list(reader)
         self.n = int(data[0][0])
@@ -14,9 +22,18 @@ class CVRP:
         self.km_data = data[2:self.n + 2]
         self.__convert_matrix_values_from_string_to_float(self.km_data)
         self.cities_data = []
+        self.load_size_data = []
+        self.load_weight_data = []
         self.nodes = list(range(self.n))
         for line in data[self.n + 2:]:
             self.cities_data.append([line[0], line[1], line[2], line[3]])
+        with open("data/" + file_name + "data.csv", 'r') as file:
+            reader = csv.reader(file, delimiter=";", skipinitialspace=True)
+            for line in reader:
+                if line[1] != '':
+                    self.load_size_data.append(float(line[1].replace(',', '.')))
+                if line[2] != '':
+                    self.load_weight_data.append(float(line[2].replace(',', '.')))
 
     def calculate_best_base_location(self):
         best_result = MAX_VALUE
@@ -37,25 +54,30 @@ class CVRP:
         available_cities = list.copy(cities)
         permutation = []
         lorry_number = 1  # numer ciężarówki
-        courses_amount = 10  # (n/K) zgodnie z założeniem stała liczba kursów dla pojazdu
         while available_cities:
             limit = True
             permutation.append(base_city)
             j = self.find_max(available_cities, base_city)  # znajdź miasto najbardziej oddalone od miasta bazowego
             permutation.append(j)
             available_cities.remove(j)
-            amount_of_order_handle_by_k_vehicle = 1  # liczba zleceń obsłużonych przez pojazd k
+            weight_k = self.load_weight_data[j]
+            size_k = self.load_size_data[j]
             while limit:
+                if not available_cities:
+                    break
                 l = self.find_min(available_cities, j)  # znajdź miasto najbliższe miasta j
-                if amount_of_order_handle_by_k_vehicle + 1 < courses_amount:
+                j = l
+                weight_l = self.load_weight_data[l]
+                size_l = self.load_size_data[l]
+                if weight_k + weight_l < maxWeight['Lorry'] and size_k + size_l < maxSize['Lorry']:
                     permutation.append(l)
                     available_cities.remove(l)
-                    amount_of_order_handle_by_k_vehicle = amount_of_order_handle_by_k_vehicle + 1
-                    if not available_cities:
-                        limit = False
+                    weight_k += weight_l
+                    size_k += size_l
                 else:
                     limit = False
-            lorry_number = lorry_number + 1
+            lorry_number += 1
+        permutation.append(base_city)
         return permutation
 
     def find_max(self, list_of_available_cities, base):
