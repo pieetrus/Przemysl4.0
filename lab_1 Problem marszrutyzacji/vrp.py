@@ -1,5 +1,8 @@
 import csv
 
+import pandas as pd
+import matplotlib.pyplot as plt
+
 MAX_VALUE = 999999
 MIN_VALUE = -1
 
@@ -17,6 +20,19 @@ class VRP:
         self.nodes = list(range(self.n))
         for line in data[self.n + 2:]:
             self.cities_data.append([line[0], line[1], line[2], line[3]])
+        self.data_for_plot = pd.read_csv("data/" + file_name + ".csv", sep=";", skiprows=self.n + 1, nrows=self.n * 2,
+                                         decimal=",")
+
+    def plot_map(self, perm):
+        fig, ax = plt.subplots()
+        x_axis = [self.data_for_plot.iat[x, 3] for x in perm]
+        y_axis = [self.data_for_plot.iat[x, 2] for x in perm]
+        plt.plot(x_axis, y_axis, "ro-")
+        i = 0
+        for xy in zip(x_axis, y_axis):  # <--
+            ax.annotate(str(self.cities_data[perm[i]][1]), xy=xy, textcoords='data')  # <--
+            i += 1
+        plt.show()
 
     def calculate_best_base_location(self):
         best_result = MAX_VALUE
@@ -32,6 +48,7 @@ class VRP:
         print("Best base location: " + str(self.cities_data[best_result_base][1]))
         print("Distance to take: " + str(best_result))
         print("Permutation: " + str(best_result_perm))
+        self.plot_map(best_result_perm)
 
     def greedy(self, base_city, cities):
         available_cities = list.copy(cities)

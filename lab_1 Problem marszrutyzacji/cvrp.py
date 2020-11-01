@@ -1,4 +1,6 @@
 import csv
+import matplotlib.pyplot as plt
+import pandas as pd
 
 MAX_VALUE = 999999
 MIN_VALUE = -1
@@ -34,6 +36,18 @@ class CVRP:
                     self.load_size_data.append(float(line[1].replace(',', '.')))
                 if line[2] != '':
                     self.load_weight_data.append(float(line[2].replace(',', '.')))
+        self.data_for_plot = pd.read_csv("data/" + file_name + ".csv", sep=";", skiprows=self.n + 1, nrows=self.n * 2, decimal=",")
+
+    def plot_map(self, perm):
+        fig, ax = plt.subplots()
+        x_axis = [self.data_for_plot.iat[x, 3] for x in perm]
+        y_axis = [self.data_for_plot.iat[x, 2] for x in perm]
+        plt.plot(x_axis, y_axis, "ro-")
+        i = 0
+        for xy in zip(x_axis, y_axis):  # <--
+            ax.annotate(str(self.cities_data[perm[i]][1]), xy=xy, textcoords='data')  # <--
+            i += 1
+        plt.show()
 
     def calculate_best_base_location(self):
         best_result = MAX_VALUE
@@ -49,6 +63,7 @@ class CVRP:
         print("Best base location: " + str(self.cities_data[best_result_base][1]))
         print("Distance to take: " + str(best_result))
         print("Permutation: " + str(best_result_perm))
+        self.plot_map(best_result_perm)
 
     def greedy(self, base_city, cities):
         available_cities = list.copy(cities)
@@ -69,7 +84,7 @@ class CVRP:
                 j = l
                 weight_l = self.load_weight_data[l]
                 size_l = self.load_size_data[l]
-                if weight_k + weight_l < maxWeight['Lorry'] and size_k + size_l < maxSize['Lorry']:
+                if weight_k + weight_l < maxWeight['Truck'] and size_k + size_l < maxSize['Truck']:
                     permutation.append(l)
                     available_cities.remove(l)
                     weight_k += weight_l
